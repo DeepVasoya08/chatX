@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
@@ -15,12 +15,14 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setLoading] = useState(false);
+  let passwordRef = useRef();
 
   const signIn = () => {
     firebase
       .auth()
       .signInWithEmailAndPassword(email, password)
       .catch((err) => Alert.alert(String(err.code), String(err.message)));
+    setLoading(true);
   };
   return (
     <KeyboardAvoidingView
@@ -42,28 +44,32 @@ const Login = ({ navigation }) => {
       <View style={styles.inputContainer}>
         <Input
           keyboardType="email-address"
-          autoFocus={true}
           autoCapitalize="none"
+          autoFocus={true}
           autoCompleteType="email"
           placeholder="Email"
           value={email}
           onChangeText={(text) => setEmail(text)}
           style={{
             color: "white",
-            fontFamily: "Roboto",
           }}
+          onSubmitEditing={() => {
+            passwordRef.focus();
+          }}
+          returnKeyType="go"
         />
         <Input
+          ref={(ref) => {
+            passwordRef = ref;
+          }}
           placeholder="Password"
           secureTextEntry
           value={password}
           onChangeText={(pass) => setPassword(pass)}
-          onSubmitEditing={signIn}
           style={{
             color: "white",
             fontFamily: "Roboto",
           }}
-          clearButtonMode="always"
         />
       </View>
       <Button
@@ -72,6 +78,7 @@ const Login = ({ navigation }) => {
         containerStyle={{ marginTop: 10 }}
         title="Login"
         onPress={signIn}
+        loading={isLoading === true ? true : false}
       />
     </KeyboardAvoidingView>
   );

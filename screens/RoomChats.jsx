@@ -10,7 +10,7 @@ const RoomChats = ({ id, RoomName, enterChat }) => {
       .firestore()
       .collection("chats")
       .doc(id)
-      .collection("message")
+      .collection("messages")
       .orderBy("timestamp", "desc")
       .onSnapshot((snap) => setChatmsg(snap.docs.map((doc) => doc.data())));
   }, []);

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,7 +13,7 @@ import {
   Keyboard,
 } from "react-native";
 import { Avatar } from "react-native-elements";
-import { AntDesign, MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import firebase from "firebase";
 
@@ -36,17 +36,6 @@ const Chats = ({ navigation, route }) => {
       });
     setInput("");
   };
-
-  // useEffect(() => {
-  //   firebase
-  //     .firestore()
-  //     .collection("userDetails")
-  //     .where("image", "==", true)
-  //     .get()
-  //     .then((snap) => {
-  //       setUserPhotoURL(snap);
-  //     });
-  // },[]);
 
   useLayoutEffect(() => {
     const unsub = firebase
@@ -81,7 +70,9 @@ const Chats = ({ navigation, route }) => {
           <Avatar
             rounded
             source={{
-              uri: firebase.auth().currentUser.photoURL,
+              uri:
+                route.params.image ||
+                "https://cencup.com/wp-content/uploads/2019/07/avatar-placeholder.png",
             }}
           />
           <Text style={{ color: "white", marginLeft: 10, fontWeight: "700" }}>
@@ -127,12 +118,20 @@ const Chats = ({ navigation, route }) => {
     });
   }, [navigation, messages]);
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#212121" }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: "#212121",
+      }}
+    >
       <StatusBar style="light" />
       <KeyboardAvoidingView style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <>
-            <ScrollView contentContainerStyle={{ paddingTop: 15 }}>
+            <ScrollView
+              contentContainerStyle={{ paddingTop: 15 }}
+              indicatorStyle="white"
+            >
               {messages.map(({ id, data }) =>
                 data.email === firebase.auth().currentUser.email ? (
                   <View key={id} style={styles.sender}>
@@ -154,7 +153,7 @@ const Chats = ({ navigation, route }) => {
                 ) : (
                   <View key={id} style={styles.reciever}>
                     <Avatar
-                      source={{ uri: data.photoURL }}
+                      source={{ uri: route.params.image }}
                       rounded
                       size={30}
                       position="absolute"

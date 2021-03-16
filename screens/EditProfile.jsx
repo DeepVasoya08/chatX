@@ -16,28 +16,11 @@ import { Text } from "react-native";
 
 const EditProfile = ({ navigation }) => {
   const [image, setImage] = useState(null);
-  const [photoUrl, setPhotoUrl] = useState(null);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [transfer, setTransfer] = useState(0);
-  const [test, setTest] = useState(null);
-
-  // useEffect(() => {
-  //   const unsub = firebase
-  //     .firestore()
-  //     .collection("userDetails")
-  //     .onSnapshot((snap) =>
-  //       setTest(
-  //         snap.docs.map((doc) => ({
-  //           id: doc.id,
-  //           data: doc.data(),
-  //         }))
-  //       )
-  //     );
-  //   return unsub;
-  // }, []);
 
   const getImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -69,12 +52,12 @@ const EditProfile = ({ navigation }) => {
       .child(imageName)
       .put(blob);
     task.on("state_changed", (snap) => {
+      console.log(Math.round(snap.bytesTransferred / snap.totalBytes) * 100);
       setTransfer(Math.round(snap.bytesTransferred / snap.totalBytes) * 100);
     });
     try {
       await task.then(async (res) => {
         await res.ref.getDownloadURL().then((res) => {
-          setPhotoUrl(res);
           firebase.auth().currentUser.updateProfile({
             photoURL: res,
           });

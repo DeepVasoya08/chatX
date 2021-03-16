@@ -20,39 +20,13 @@ import firebase from "firebase";
 const Chats = ({ navigation, route }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
-  const [image, setImage] = useState(null);
-  // const getCamera = async () => {
-  //   const getImageRequest = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  //   if (getImageRequest.granted === false) {
-  //     return;
-  //   }
-  //   const getImage = await ImagePicker.launchImageLibraryAsync({
-  //     quality: 1,
-  //   });
-  //   if (!getImage.cancelled) {
-  //     setImage(getImage.uri);
-  //   }
-  // };
-
-  //   const sendImage = async () => {
-  //     const uri = image;
-  //     const response = await fetch(uri);
-  //     const blob = await response.blob();
-
-  //     const task = await storage
-  //       .ref()
-  //       .child(
-  //         `image/${firebse.auth().currentUser.uid}/${Math.random().toString(30)}`
-  //       )
-  //       .put(blob);
-  //     };
 
   const sendMsg = () => {
     firebase
       .firestore()
       .collection("chats")
       .doc(route.params.id)
-      .collection("message")
+      .collection("messages")
       .add({
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         message: input || null,
@@ -68,7 +42,7 @@ const Chats = ({ navigation, route }) => {
       .firestore()
       .collection("chats")
       .doc(route.params.id)
-      .collection("message")
+      .collection("messages")
       .orderBy("timestamp", "desc")
       .onSnapshot((snap) =>
         setMessages(
@@ -93,12 +67,7 @@ const Chats = ({ navigation, route }) => {
             marginLeft: -20,
           }}
         >
-          <Avatar
-            rounded
-            source={{
-              uri: firebase.auth().currentUser.photoURL,
-            }}
-          />
+          <Avatar rounded source={require("../assets/group.jpg")} />
           <Text style={{ color: "white", marginLeft: 10, fontWeight: "700" }}>
             {route.params.RoomName}
           </Text>

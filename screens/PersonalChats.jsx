@@ -21,7 +21,7 @@ const PersonalChats = ({ id, name, enterPersonalChat, image }) => {
   } else {
     return (
       <ListItem
-        onPress={() => enterPersonalChat(id, name)}
+        onPress={() => enterPersonalChat(id, name, image)}
         key={id}
         containerStyle={{ backgroundColor: "transparent" }}
       >

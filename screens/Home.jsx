@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Avatar } from "react-native-elements";
-import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { Ionicons, Octicons, AntDesign } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
 import firebase from "firebase";
@@ -77,15 +77,10 @@ const Home = ({ navigation }) => {
           }}
         >
           <TouchableOpacity onPress={() => navigation.navigate("AddRoom")}>
-            <Ionicons
-              name="add-circle-outline"
-              size={29}
-              color="white"
-              onMagicTap="Create Group"
-            />
+            <AntDesign name="addusergroup" size={28} color="white" />
           </TouchableOpacity>
           <TouchableOpacity onPress={signOut}>
-            <MaterialIcons name="logout" size={25} color="white" />
+            <Octicons name="sign-out" size={25} color="white" />
           </TouchableOpacity>
         </View>
       ),
@@ -103,10 +98,11 @@ const Home = ({ navigation }) => {
     });
   };
 
-  const enterPersonalChat = (id, name) => {
-    navigation.navigate("EnterPersonalChats", {
+  const enterPersonalChat = (id, name, image) => {
+    navigation.push("EnterPersonalChats", {
       id: id,
       name: name,
+      image: image,
     });
   };
 
