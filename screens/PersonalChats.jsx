@@ -23,7 +23,7 @@ const PersonalChats = ({ id, name, enterPersonalChat, image }) => {
       <ListItem
         onPress={() => enterPersonalChat(id, name, image)}
         key={id}
-        containerStyle={{ backgroundColor: "transparent" }}
+        style={{ backgroundColor: "transparent" }}
       >
         <Avatar
           rounded
@@ -34,14 +34,14 @@ const PersonalChats = ({ id, name, enterPersonalChat, image }) => {
           }}
         />
         <ListItem.Content>
-          <ListItem.Title style={{ fontWeight: "800", color: "white" }}>
+          <ListItem.Title style={{ fontWeight: "800", color: "black" }}>
             {name}
           </ListItem.Title>
           {userChats?.[0]?.message == null ? (
             <ListItem.Subtitle
               numberOfLines={1}
               ellipsizeMode="tail"
-              style={{ color: "white" }}
+              style={{ color: "black" }}
             >
               <Text style={{ color: "#ababab" }}>Start Talk..</Text>
             </ListItem.Subtitle>
@@ -49,7 +49,7 @@ const PersonalChats = ({ id, name, enterPersonalChat, image }) => {
             <ListItem.Subtitle
               numberOfLines={1}
               ellipsizeMode="tail"
-              style={{ color: "white" }}
+              style={{ color: "black" }}
             >
               {userChats?.[0]?.message}
             </ListItem.Subtitle>

@@ -7,18 +7,21 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Avatar } from "react-native-elements";
-import { Ionicons, Octicons, AntDesign } from "@expo/vector-icons";
+import { Octicons, AntDesign } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { LinearGradient } from "expo-linear-gradient";
 import firebase from "firebase";
 import RoomChats from "./RoomChats";
 import PersonalChats from "./PersonalChats";
+import FloatingButton from "../custom/FloatingButton";
+import { ActivityIndicator } from "react-native";
 
 const Home = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const [userChats, setUserChats] = useState([]);
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     const unsub = firebase
       .firestore()
       .collection("chats")
@@ -45,15 +48,16 @@ const Home = ({ navigation }) => {
           }))
         )
       );
+    setLoading(false);
     return unsub;
   }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: `${firebase.auth().currentUser.displayName}`,
-      headerStyle: { backgroundColor: "black" },
-      headerTitleStyle: { color: "white" },
-      headerTintColor: "white",
+      headerStyle: { backgroundColor: "rgb(230, 230, 230)" },
+      headerTitleStyle: { color: "black" },
+      headerTintColor: "black",
       headerLeft: () => (
         <View style={{ marginLeft: 20 }}>
           <TouchableOpacity onPress={() => navigation.push("EditProfile")}>
@@ -77,10 +81,10 @@ const Home = ({ navigation }) => {
           }}
         >
           <TouchableOpacity onPress={() => navigation.navigate("AddRoom")}>
-            <AntDesign name="addusergroup" size={28} color="white" />
+            <AntDesign name="addusergroup" size={28} color="black" />
           </TouchableOpacity>
           <TouchableOpacity onPress={signOut}>
-            <Octicons name="sign-out" size={25} color="white" />
+            <Octicons name="sign-out" size={25} color="black" />
           </TouchableOpacity>
         </View>
       ),
@@ -92,7 +96,7 @@ const Home = ({ navigation }) => {
   };
 
   const enterChat = (id, RoomName) => {
-    navigation.navigate("Chats", {
+    navigation.push("Chats", {
       id: id,
       RoomName: RoomName,
     });
@@ -105,34 +109,51 @@ const Home = ({ navigation }) => {
       image: image,
     });
   };
-
   return (
-    <SafeAreaView style={{ flex: 1, justifyContent: "center" }}>
-      <StatusBar style="light" />
-      <LinearGradient
-        colors={["rgba(30, 16, 24, 0.83)", "rgba(4, 2, 4, 0.94)"]}
-      >
-        <ScrollView style={styles.container}>
-          {chats.map(({ id, data: { RoomName } }) => (
-            <RoomChats
-              key={id}
-              id={id}
-              RoomName={RoomName}
-              enterChat={enterChat}
-            />
-          ))}
-          {userChats.map(({ id, data: { name, image } }) => (
-            <PersonalChats
-              key={id}
-              id={id}
-              name={name}
-              image={image}
-              enterPersonalChat={enterPersonalChat}
-            />
-          ))}
-        </ScrollView>
-      </LinearGradient>
-    </SafeAreaView>
+    <>
+      {isLoading ? (
+        <ActivityIndicator
+          color="#000000"
+          size={50}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        />
+      ) : (
+        <SafeAreaView
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            backgroundColor: "white",
+          }}
+        >
+          <StatusBar style="dark" />
+          <ScrollView style={styles.container}>
+            {chats.map(({ id, data: { RoomName } }) => (
+              <RoomChats
+                key={id}
+                id={id}
+                RoomName={RoomName}
+                enterChat={enterChat}
+              />
+            ))}
+            {userChats.map(({ id, data: { name, image } }) => (
+              <PersonalChats
+                key={id}
+                id={id}
+                name={name}
+                image={image}
+                enterPersonalChat={enterPersonalChat}
+              />
+            ))}
+          </ScrollView>
+          <FloatingButton onPress={() => navigation.push("AddRoom")} />
+        </SafeAreaView>
+      )}
+    </>
   );
 };
 

@@ -64,7 +64,7 @@ const Chats = ({ navigation, route }) => {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            marginLeft: -20,
+            marginLeft: -30,
           }}
         >
           <Avatar
@@ -121,7 +121,7 @@ const Chats = ({ navigation, route }) => {
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: "#212121",
+        backgroundColor: "#cccccc",
       }}
     >
       <StatusBar style="light" />
@@ -138,9 +138,9 @@ const Chats = ({ navigation, route }) => {
                     <Avatar
                       source={{ uri: firebase.auth().currentUser.photoURL }}
                       rounded
-                      size={30}
+                      size={28}
                       position="absolute"
-                      bottom={-15}
+                      bottom={-17}
                       right={-5}
                       containerStyle={{
                         position: "absolute",
@@ -175,22 +175,25 @@ const Chats = ({ navigation, route }) => {
             >
               <TextInput
                 value={input}
-                onChangeText={(txt) => setInput(txt)}
+                onChangeText={setInput}
                 placeholder="Let's Go.."
                 style={styles.textInput}
                 onSubmitEditing={sendMsg}
+                multiline={true}
               />
-              <TouchableOpacity>
-                <MaterialIcons name="perm-media" size={25} color="white" />
-              </TouchableOpacity>
               {!input ? (
-                <TouchableOpacity activeOpacity={0.5}>
-                  <MaterialIcons
-                    name="emoji-emotions"
-                    size={25}
-                    color="white"
-                  />
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity>
+                    <MaterialIcons name="perm-media" size={25} color="white" />
+                  </TouchableOpacity>
+                  <TouchableOpacity activeOpacity={0.5}>
+                    <MaterialIcons
+                      name="emoji-emotions"
+                      size={25}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                </>
               ) : (
                 <TouchableOpacity
                   disabled={!input}
@@ -222,9 +225,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   textInput: {
-    bottom: 0,
     height: 40,
-    flex: 0.9,
+    flex: 0.95,
     backgroundColor: "#efecec",
     padding: 10,
     color: "grey",

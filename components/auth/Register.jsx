@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   KeyboardAvoidingView,
@@ -10,13 +10,19 @@ import { StatusBar } from "expo-status-bar";
 import firebase from "firebase";
 import { Button, Input, Text } from "react-native-elements";
 
-const Register = ({ navigation }) => {
+const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
+  const [isLoading, setLoading] = useState(false);
+
+  let emailRef = useRef();
+  let passwordRef = useRef();
+  let confirmPasswordRef = useRef();
 
   const register = async () => {
+    setLoading(true);
     if (password === confirmpassword) {
       await firebase
         .auth()
@@ -41,6 +47,7 @@ const Register = ({ navigation }) => {
     } else {
       Alert.alert("Bad Password", "Password does not match");
     }
+    setLoading(false);
   };
   return (
     <KeyboardAvoidingView
@@ -65,45 +72,66 @@ const Register = ({ navigation }) => {
           placeholder="Full Name"
           autoFocus={true}
           value={name}
-          onChangeText={(text) => setName(text)}
+          onChangeText={setName}
           style={{
             color: "white",
             fontFamily: "Roboto",
           }}
+          returnKeyType="next"
+          onSubmitEditing={() => {
+            emailRef.focus();
+          }}
         />
         <Input
+          ref={(ref) => {
+            emailRef = ref;
+          }}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCompleteType="email"
           placeholder="Email"
           value={email}
-          onChangeText={(text) => setEmail(text)}
+          onChangeText={setEmail}
           style={{
             color: "white",
             fontFamily: "Roboto",
           }}
+          returnKeyType="next"
+          onSubmitEditing={() => {
+            passwordRef.focus();
+          }}
         />
         <Input
+          ref={(ref) => {
+            passwordRef = ref;
+          }}
           secureTextEntry
           placeholder="Password"
           value={password}
-          onChangeText={(text) => setPassword(text)}
+          onChangeText={setPassword}
           style={{
             color: "white",
             fontFamily: "Roboto",
           }}
+          returnKeyType="next"
+          onSubmitEditing={() => {
+            confirmPasswordRef.focus();
+          }}
         />
         <Input
+          ref={(ref) => {
+            confirmPasswordRef = ref;
+          }}
           secureTextEntry
           placeholder="Confirm Password"
           type="password"
           value={confirmpassword}
-          onChangeText={(text) => setConfirmPassword(text)}
-          onSubmitEditing={register}
+          onChangeText={setConfirmPassword}
           style={{
             color: "white",
             fontFamily: "Roboto",
           }}
+          returnKeyType="done"
         />
       </View>
       <View>
@@ -112,6 +140,7 @@ const Register = ({ navigation }) => {
           raised
           title="Register"
           onPress={register}
+          loading={isLoading === true ? true : false}
         />
       </View>
     </KeyboardAvoidingView>

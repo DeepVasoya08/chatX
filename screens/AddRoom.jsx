@@ -33,12 +33,12 @@ const AddRoom = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar animated networkActivityIndicatorVisible style="dark" />
       <Input
-        style={{ color: "white" }}
+        style={{ color: "black" }}
         placeholder="Enter Group Name"
         value={input}
-        onChangeText={(text) => setInput(text)}
+        onChangeText={setInput}
         leftIcon={
-          <Icon name="group" type="antdesign" size={24} color="white" />
+          <Icon name="group" type="antdesign" size={24} color="black" />
         }
         onSubmitEditing={createRoom}
       />
@@ -51,7 +51,7 @@ export default AddRoom;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#2c3e50",
+    backgroundColor: "white",
     padding: 30,
     height: "100%",
   },

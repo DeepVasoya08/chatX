@@ -56,7 +56,7 @@ const Login = ({ navigation }) => {
           onSubmitEditing={() => {
             passwordRef.focus();
           }}
-          returnKeyType="go"
+          returnKeyType="next"
         />
         <Input
           ref={(ref) => {
@@ -70,6 +70,7 @@ const Login = ({ navigation }) => {
             color: "white",
             fontFamily: "Roboto",
           }}
+          returnKeyType="done"
         />
       </View>
       <Button

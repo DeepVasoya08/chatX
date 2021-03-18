@@ -19,24 +19,24 @@ const RoomChats = ({ id, RoomName, enterChat }) => {
     <ListItem
       onPress={() => enterChat(id, RoomName)}
       key={id}
-      containerStyle={{ backgroundColor: "transparent" }}
+      style={{ backgroundColor: "white" }}
     >
       <Avatar rounded source={require("../assets/group.jpg")} />
       <ListItem.Content>
-        <ListItem.Title style={{ fontWeight: "800", color: "white" }}>
+        <ListItem.Title style={{ fontWeight: "800", color: "black" }}>
           {RoomName}
         </ListItem.Title>
         {chatmsg?.[0]?.displayName && chatmsg?.[0]?.message == "" ? (
           <ListItem.Subtitle
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={{ color: "white" }}
+            style={{ color: "black" }}
           ></ListItem.Subtitle>
         ) : (
           <ListItem.Subtitle
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={{ color: "white" }}
+            style={{ color: "black" }}
           >
             {chatmsg?.[0]?.displayName} : {chatmsg?.[0]?.message}
           </ListItem.Subtitle>

@@ -64,11 +64,11 @@ const Chats = ({ navigation, route }) => {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            marginLeft: -20,
+            marginLeft: -30,
           }}
         >
           <Avatar rounded source={require("../assets/group.jpg")} />
-          <Text style={{ color: "white", marginLeft: 10, fontWeight: "700" }}>
+          <Text style={{ color: "white", marginLeft: 12, fontWeight: "700" }}>
             {route.params.RoomName}
           </Text>
         </View>
@@ -111,7 +111,7 @@ const Chats = ({ navigation, route }) => {
     });
   }, [navigation, messages]);
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#212121" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#cccccc" }}>
       <StatusBar style="light" />
       <KeyboardAvoidingView style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -123,15 +123,15 @@ const Chats = ({ navigation, route }) => {
                     <Avatar
                       source={{ uri: data.photoURL }}
                       rounded
-                      size={30}
+                      size={28}
                       position="absolute"
-                      bottom={-15}
+                      bottom={-17}
                       right={-5}
-                      containerStyle={{
-                        position: "absolute",
-                        bottom: -15,
-                        right: -5,
-                      }}
+                      // containerStyle={{
+                      //   position: "absolute",
+                      //   bottom: 13,
+                      //   right: -5,
+                      // }}
                     />
                     <Text style={styles.senderText}>{data.message}</Text>
                   </View>
@@ -143,10 +143,10 @@ const Chats = ({ navigation, route }) => {
                       size={30}
                       position="absolute"
                       bottom={-20}
-                      containerStyle={{
-                        position: "absolute",
-                        bottom: -15,
-                      }}
+                      // containerStyle={{
+                      //   position: "absolute",
+                      //   bottom: -15,
+                      // }}
                     />
                     <Text style={styles.recieverText}>{data.message}</Text>
                     <Text style={styles.recieverName}>{data.displayName}</Text>
