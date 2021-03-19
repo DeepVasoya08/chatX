@@ -24,7 +24,7 @@ const Chats = ({ navigation, route }) => {
   const sendMsg = () => {
     firebase
       .firestore()
-      .collection("chats")
+      .collection("roomChats")
       .doc(route.params.id)
       .collection("messages")
       .add({
@@ -40,7 +40,7 @@ const Chats = ({ navigation, route }) => {
   useLayoutEffect(() => {
     const unsub = firebase
       .firestore()
-      .collection("chats")
+      .collection("roomChats")
       .doc(route.params.id)
       .collection("messages")
       .orderBy("timestamp", "desc")

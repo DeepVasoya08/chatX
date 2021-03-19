@@ -8,7 +8,7 @@ const RoomChats = ({ id, RoomName, enterChat }) => {
   useEffect(() => {
     firebase
       .firestore()
-      .collection("chats")
+      .collection("roomChats")
       .doc(id)
       .collection("messages")
       .orderBy("timestamp", "desc")
