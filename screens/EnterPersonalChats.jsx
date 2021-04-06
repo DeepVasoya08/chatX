@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -20,13 +20,14 @@ import firebase from "firebase";
 const Chats = ({ navigation, route }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  let ScrollToEnd = useRef();
 
   const sendMsg = () => {
     firebase
       .firestore()
       .collection("personalChats")
       .doc(route.params.id)
-      .collection("message")
+      .collection("messages")
       .add({
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         message: input,
@@ -42,8 +43,8 @@ const Chats = ({ navigation, route }) => {
       .firestore()
       .collection("personalChats")
       .doc(route.params.id)
-      .collection("message")
-      .orderBy("timestamp", "desc")
+      .collection("messages")
+      .orderBy("timestamp", "asc")
       .onSnapshot((snap) =>
         setMessages(
           snap.docs.map((doc) => ({
@@ -129,8 +130,11 @@ const Chats = ({ navigation, route }) => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <>
             <ScrollView
+              ref={ScrollToEnd}
+              onContentSizeChange={() => {
+                ScrollToEnd.current.scrollToEnd({ animated: true });
+              }}
               contentContainerStyle={{ paddingTop: 15 }}
-              indicatorStyle="white"
             >
               {messages.map(({ id, data }) =>
                 data.email === firebase.auth().currentUser.email ? (
@@ -179,7 +183,6 @@ const Chats = ({ navigation, route }) => {
                 placeholder="Let's Go.."
                 style={styles.textInput}
                 onSubmitEditing={sendMsg}
-                multiline={true}
               />
               {!input ? (
                 <>

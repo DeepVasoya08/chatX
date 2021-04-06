@@ -19,7 +19,7 @@ const AddRoom = ({ navigation }) => {
   const createRoom = async () => {
     await firebase
       .firestore()
-      .collection("chats")
+      .collection("roomChats")
       .add({
         RoomName: input,
       })
@@ -33,6 +33,7 @@ const AddRoom = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar animated networkActivityIndicatorVisible style="dark" />
       <Input
+        autoFocus={true}
         style={{ color: "black" }}
         placeholder="Enter Group Name"
         value={input}

@@ -82,16 +82,15 @@ export class App extends Component {
               name="Register"
               component={Register}
               options={{
-                headerStyle: { backgroundColor: "#424242" },
+                headerStyle: { backgroundColor: "gray" },
                 headerTintColor: "white",
-                headerBackTitle: "Back",
               }}
             />
             <Stack.Screen
               name="Login"
               component={Login}
               options={{
-                headerStyle: { backgroundColor: "#313131" },
+                headerStyle: { backgroundColor: "gray" },
                 headerTintColor: "white",
               }}
             />

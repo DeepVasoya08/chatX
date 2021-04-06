@@ -1,14 +1,15 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   KeyboardAvoidingView,
   Alert,
   Platform,
   StyleSheet,
+  TextInput,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import firebase from "firebase";
-import { Button, Input, Text } from "react-native-elements";
+import { Button, Text } from "react-native-elements";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -51,7 +52,7 @@ const Register = () => {
   };
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : ""}
       style={styles.container}
     >
       <StatusBar style="light" />
@@ -62,85 +63,68 @@ const Register = () => {
           marginBottom: 50,
           fontFamily: "monospace",
           fontStyle: "italic",
-          color: "white",
+          color: "black",
         }}
       >
         Let's Create Your Account
       </Text>
       <View style={styles.inputContainer}>
-        <Input
+        <TextInput
+          style={styles.fields}
           placeholder="Full Name"
           autoFocus={true}
           value={name}
           onChangeText={setName}
-          style={{
-            color: "white",
-            fontFamily: "Roboto",
-          }}
           returnKeyType="next"
           onSubmitEditing={() => {
-            emailRef.focus();
+            emailRef.current.focus() && emailRef.focus();
           }}
         />
-        <Input
-          ref={(ref) => {
-            emailRef = ref;
-          }}
+        <TextInput
+          ref={emailRef}
+          style={styles.fields}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCompleteType="email"
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
-          style={{
-            color: "white",
-            fontFamily: "Roboto",
-          }}
           returnKeyType="next"
           onSubmitEditing={() => {
-            passwordRef.focus();
+            passwordRef.current.focus() && passwordRef.focus();
           }}
         />
-        <Input
-          ref={(ref) => {
-            passwordRef = ref;
-          }}
+        <TextInput
+          style={styles.fields}
+          ref={passwordRef}
           secureTextEntry
           placeholder="Password"
           value={password}
           onChangeText={setPassword}
-          style={{
-            color: "white",
-            fontFamily: "Roboto",
-          }}
           returnKeyType="next"
           onSubmitEditing={() => {
-            confirmPasswordRef.focus();
+            confirmPasswordRef.current.focus() && confirmPasswordRef.focus();
           }}
         />
-        <Input
-          ref={(ref) => {
-            confirmPasswordRef = ref;
-          }}
+        <TextInput
+          style={styles.fields}
+          ref={confirmPasswordRef}
           secureTextEntry
           placeholder="Confirm Password"
           type="password"
           value={confirmpassword}
           onChangeText={setConfirmPassword}
-          style={{
-            color: "white",
-            fontFamily: "Roboto",
-          }}
           returnKeyType="done"
         />
       </View>
-      <View>
+      <View style={{ marginTop: 10 }}>
         <Button
           buttonStyle={styles.button}
           raised
           title="Register"
           onPress={register}
           loading={isLoading === true ? true : false}
+          activeOpacity={0.4}
         />
       </View>
     </KeyboardAvoidingView>
@@ -155,7 +139,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 10,
-    backgroundColor: "#212121",
+    backgroundColor: "#ffffff",
   },
   button: {
     width: 200,
@@ -163,5 +147,16 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: 350,
+  },
+  fields: {
+    color: "black",
+    backgroundColor: "#cccccc",
+    borderRadius: 10,
+    fontWeight: "600",
+    fontSize: 16,
+    fontFamily: "sans-serif-condensed",
+    height: 50,
+    padding: 8,
+    margin: 5,
   },
 });

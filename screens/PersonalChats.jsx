@@ -11,7 +11,7 @@ const PersonalChats = ({ id, name, enterPersonalChat, image }) => {
       .firestore()
       .collection("personalChats")
       .doc(id)
-      .collection("message")
+      .collection("messages")
       .orderBy("timestamp", "desc")
       .onSnapshot((snap) => setUserChats(snap.docs.map((doc) => doc.data())));
   }, []);

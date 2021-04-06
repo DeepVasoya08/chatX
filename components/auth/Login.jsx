@@ -7,11 +7,12 @@ import {
   KeyboardAvoidingView,
   Text,
   Alert,
+  TextInput,
 } from "react-native";
-import { Button, Input } from "react-native-elements";
+import { Button } from "react-native-elements";
 import firebase from "firebase";
 
-const Login = ({ navigation }) => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setLoading] = useState(false);
@@ -27,49 +28,42 @@ const Login = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : ""}
     >
       <StatusBar style="light" />
       <Text
         style={{
-          color: "#e3f2fd",
-          fontWeight: "500",
+          color: "black",
+          fontWeight: "800",
           fontSize: 40,
           fontStyle: "italic",
           marginTop: -80,
         }}
       >
-        Sign In
+        Welcome back
       </Text>
       <View style={styles.inputContainer}>
-        <Input
+        <TextInput
+          style={styles.fields}
           keyboardType="email-address"
           autoCapitalize="none"
-          autoFocus={true}
           autoCompleteType="email"
+          autoFocus={true}
           placeholder="Email"
           value={email}
-          onChangeText={(text) => setEmail(text)}
-          style={{
-            color: "white",
-          }}
+          onChangeText={setEmail}
           onSubmitEditing={() => {
-            passwordRef.focus();
+            passwordRef.current.focus() && passwordRef.focus();
           }}
           returnKeyType="next"
         />
-        <Input
-          ref={(ref) => {
-            passwordRef = ref;
-          }}
+        <TextInput
+          ref={passwordRef}
+          style={styles.fields}
           placeholder="Password"
           secureTextEntry
           value={password}
-          onChangeText={(pass) => setPassword(pass)}
-          style={{
-            color: "white",
-            fontFamily: "Roboto",
-          }}
+          onChangeText={setPassword}
           returnKeyType="done"
         />
       </View>
@@ -97,10 +91,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 10,
-    backgroundColor: "#313131",
+    backgroundColor: "#d9d9d9",
   },
   button: {
     width: 200,
     borderRadius: 20,
+  },
+  fields: {
+    color: "black",
+    backgroundColor: "#cccccc",
+    borderRadius: 10,
+    fontWeight: "600",
+    fontSize: 16,
+    fontFamily: "sans-serif-condensed",
+    height: 50,
+    padding: 8,
+    margin: 5,
   },
 });

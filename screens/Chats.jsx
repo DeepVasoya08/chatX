@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -20,6 +20,7 @@ import firebase from "firebase";
 const Chats = ({ navigation, route }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  let ScrollToEnd = useRef();
 
   const sendMsg = () => {
     firebase
@@ -116,7 +117,13 @@ const Chats = ({ navigation, route }) => {
       <KeyboardAvoidingView style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <>
-            <ScrollView contentContainerStyle={{ paddingTop: 15 }}>
+            <ScrollView
+              contentContainerStyle={{ paddingTop: 15 }}
+              ref={ScrollToEnd}
+              onContentSizeChange={() => {
+                ScrollToEnd.current.scrollToEnd({ animated: true });
+              }}
+            >
               {messages.map(({ id, data }) =>
                 data.email === firebase.auth().currentUser.email ? (
                   <View key={id} style={styles.sender}>

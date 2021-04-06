@@ -24,7 +24,7 @@ const Home = ({ navigation }) => {
     setLoading(true);
     const unsub = firebase
       .firestore()
-      .collection("chats")
+      .collection("roomChats")
       .onSnapshot((snap) =>
         setChats(
           snap.docs.map((doc) => ({
@@ -150,7 +150,7 @@ const Home = ({ navigation }) => {
               />
             ))}
           </ScrollView>
-          <FloatingButton onPress={() => navigation.push("AddRoom")} />
+          {/* <FloatingButton onPress={() => navigation.push("AddRoom")} /> */}
         </SafeAreaView>
       )}
     </>
