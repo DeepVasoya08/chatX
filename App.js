@@ -9,7 +9,6 @@ import rootReducer from "./redux/reducers";
 import LandingScreen from "./components/auth/LandingScreen";
 import { SafeAreaView, ActivityIndicator } from "react-native";
 import Register from "./components/auth/Register";
-import Login from "./components/auth/Login";
 import Home from "./screens/Home";
 import Chats from "./screens/Chats";
 import AddRoom from "./screens/AddRoom";
@@ -81,14 +80,6 @@ export class App extends Component {
             <Stack.Screen
               name="Register"
               component={Register}
-              options={{
-                headerStyle: { backgroundColor: "gray" },
-                headerTintColor: "white",
-              }}
-            />
-            <Stack.Screen
-              name="Login"
-              component={Login}
               options={{
                 headerStyle: { backgroundColor: "gray" },
                 headerTintColor: "white",

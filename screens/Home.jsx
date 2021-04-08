@@ -33,11 +33,7 @@ const Home = ({ navigation }) => {
           }))
         )
       );
-    return unsub;
-  }, []);
-
-  useEffect(() => {
-    const unsub = firebase
+    const unsub2 = firebase
       .firestore()
       .collection("userDetails")
       .onSnapshot((snap) =>
@@ -49,7 +45,7 @@ const Home = ({ navigation }) => {
         )
       );
     setLoading(false);
-    return unsub;
+    return unsub, unsub2;
   }, []);
 
   useLayoutEffect(() => {
@@ -110,50 +106,48 @@ const Home = ({ navigation }) => {
     });
   };
   return (
-    <>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        backgroundColor: "white",
+      }}
+    >
+      <StatusBar style="dark" />
       {isLoading ? (
         <ActivityIndicator
-          color="#000000"
+          color="blue"
           size={50}
           style={{
             flex: 1,
             display: "flex",
-            alignItems: "center",
             justifyContent: "center",
+            alignContent: "center",
           }}
         />
       ) : (
-        <SafeAreaView
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            backgroundColor: "white",
-          }}
-        >
-          <StatusBar style="dark" />
-          <ScrollView style={styles.container}>
-            {chats.map(({ id, data: { RoomName } }) => (
-              <RoomChats
-                key={id}
-                id={id}
-                RoomName={RoomName}
-                enterChat={enterChat}
-              />
-            ))}
-            {userChats.map(({ id, data: { name, image } }) => (
-              <PersonalChats
-                key={id}
-                id={id}
-                name={name}
-                image={image}
-                enterPersonalChat={enterPersonalChat}
-              />
-            ))}
-          </ScrollView>
-          {/* <FloatingButton onPress={() => navigation.push("AddRoom")} /> */}
-        </SafeAreaView>
+        <ScrollView style={styles.container}>
+          {chats.map(({ id, data: { RoomName } }) => (
+            <RoomChats
+              key={id}
+              id={id}
+              RoomName={RoomName}
+              enterChat={enterChat}
+            />
+          ))}
+          {userChats.map(({ id, data: { name, image } }) => (
+            <PersonalChats
+              key={id}
+              id={id}
+              name={name}
+              image={image}
+              enterPersonalChat={enterPersonalChat}
+            />
+          ))}
+        </ScrollView>
       )}
-    </>
+      {/* <FloatingButton onPress={() => navigation.push("AddRoom")} /> */}
+    </SafeAreaView>
   );
 };
 
