@@ -44,7 +44,7 @@ const Chats = ({ navigation, route }) => {
       .collection("roomChats")
       .doc(route.params.id)
       .collection("messages")
-      .orderBy("timestamp", "desc")
+      .orderBy("timestamp", "asc")
       .onSnapshot((snap) =>
         setMessages(
           snap.docs.map((doc) => ({
@@ -114,88 +114,70 @@ const Chats = ({ navigation, route }) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#cccccc" }}>
       <StatusBar style="light" />
-      <KeyboardAvoidingView style={styles.container}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <>
-            <ScrollView
-              contentContainerStyle={{ paddingTop: 15 }}
-              ref={ScrollToEnd}
-              onContentSizeChange={() => {
-                ScrollToEnd.current.scrollToEnd({ animated: true });
-              }}
-            >
-              {messages.map(({ id, data }) =>
-                data.email === firebase.auth().currentUser.email ? (
-                  <View key={id} style={styles.sender}>
-                    <Avatar
-                      source={{ uri: data.photoURL }}
-                      rounded
-                      size={28}
-                      position="absolute"
-                      bottom={-17}
-                      right={-5}
-                      // containerStyle={{
-                      //   position: "absolute",
-                      //   bottom: 13,
-                      //   right: -5,
-                      // }}
-                    />
-                    <Text style={styles.senderText}>{data.message}</Text>
-                  </View>
-                ) : (
-                  <View key={id} style={styles.reciever}>
-                    <Avatar
-                      source={{ uri: data.photoURL }}
-                      rounded
-                      size={30}
-                      position="absolute"
-                      bottom={-20}
-                      // containerStyle={{
-                      //   position: "absolute",
-                      //   bottom: -15,
-                      // }}
-                    />
-                    <Text style={styles.recieverText}>{data.message}</Text>
-                    <Text style={styles.recieverName}>{data.displayName}</Text>
-                  </View>
-                )
-              )}
-            </ScrollView>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              style={styles.footer}
-            >
-              <TextInput
-                value={input}
-                onChangeText={(txt) => setInput(txt)}
-                placeholder="Let's Go.."
-                style={styles.textInput}
-                onSubmitEditing={sendMsg}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingTop: 15 }}
+        ref={ScrollToEnd}
+        onContentSizeChange={() => {
+          ScrollToEnd.current.scrollToEnd({ animated: true });
+        }}
+      >
+        {messages.map(({ id, data }) =>
+          data.email === firebase.auth().currentUser.email ? (
+            <View key={id} style={styles.sender}>
+              <Avatar
+                source={{ uri: data.photoURL }}
+                rounded
+                size={28}
+                position="absolute"
+                bottom={-17}
+                right={-5}
               />
-              <TouchableOpacity>
-                <MaterialIcons name="perm-media" size={25} color="white" />
-              </TouchableOpacity>
-              {!input ? (
-                <TouchableOpacity activeOpacity={0.5}>
-                  <MaterialIcons
-                    name="emoji-emotions"
-                    size={25}
-                    color="white"
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  disabled={!input}
-                  activeOpacity={0.5}
-                  onPress={sendMsg}
-                >
-                  <MaterialIcons name="send" size={25} color="#2b86e6" />
-                </TouchableOpacity>
-              )}
-            </KeyboardAvoidingView>
-          </>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+              <Text style={styles.senderText}>{data.message}</Text>
+            </View>
+          ) : (
+            <View key={id} style={styles.reciever}>
+              <Avatar
+                source={{ uri: data.photoURL }}
+                rounded
+                size={30}
+                position="absolute"
+                bottom={-20}
+              />
+              <Text style={styles.recieverText}>{data.message}</Text>
+              <Text style={styles.recieverName}>{data.displayName}</Text>
+            </View>
+          )
+        )}
+      </ScrollView>
+      <View
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.footer}
+      >
+        <TextInput
+          value={input}
+          onChangeText={(txt) => setInput(txt)}
+          placeholder="Type..."
+          style={styles.textInput}
+          onSubmitEditing={sendMsg}
+        />
+        <TouchableOpacity>
+          <MaterialIcons name="perm-media" size={25} color="white" />
+        </TouchableOpacity>
+        {!input ? (
+          <TouchableOpacity activeOpacity={0.5}>
+            <MaterialIcons name="emoji-emotions" size={25} color="white" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            disabled={!input}
+            activeOpacity={0.5}
+            onPress={sendMsg}
+          >
+            <MaterialIcons name="send" size={25} color="#2b86e6" />
+          </TouchableOpacity>
+        )}
+      </View>
     </SafeAreaView>
   );
 };

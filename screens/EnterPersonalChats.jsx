@@ -6,34 +6,40 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
-  TouchableWithoutFeedback,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
 } from "react-native";
 import { Avatar } from "react-native-elements";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import firebase from "firebase";
+import * as ImagePicker from "expo-image-picker";
+import { ActivityIndicator } from "react-native";
+import { Image } from "react-native";
 
 const Chats = ({ navigation, route }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [imageshr, setImage] = useState([]);
+  const [loading, setLoading] = useState(false);
   let ScrollToEnd = useRef();
+  const senderID = firebase.auth().currentUser.uid;
+  const receiverID = route.params.id;
+
+  const sorted =
+    senderID < receiverID ? senderID + receiverID : receiverID + senderID;
 
   const sendMsg = () => {
     firebase
       .firestore()
       .collection("personalChats")
-      .doc(route.params.id)
+      .doc(sorted)
       .collection("messages")
       .add({
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         message: input,
-        displayName: firebase.auth().currentUser.displayName,
-        email: firebase.auth().currentUser.email,
-        photoURL: firebase.auth().currentUser.photoURL,
+        sender: senderID,
+        reciever: receiverID,
       });
     setInput("");
   };
@@ -42,7 +48,7 @@ const Chats = ({ navigation, route }) => {
     const unsub = firebase
       .firestore()
       .collection("personalChats")
-      .doc(route.params.id)
+      .doc(sorted)
       .collection("messages")
       .orderBy("timestamp", "asc")
       .onSnapshot((snap) =>
@@ -95,7 +101,6 @@ const Chats = ({ navigation, route }) => {
             flexDirection: "row",
             justifyContent: "space-between",
             width: 90,
-            // marginRight: 15,
           }}
         >
           <TouchableOpacity>
@@ -118,99 +123,103 @@ const Chats = ({ navigation, route }) => {
       ),
     });
   }, [navigation, messages]);
+
+  const getImage = async () => {
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaType: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (pickerResult.cancelled) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(pickerResult.uri);
+      const blob = await response.blob();
+      const imageName = pickerResult.uri.substring(
+        pickerResult.uri.lastIndexOf("/") + 1
+      );
+      const task = firebase
+        .storage()
+        .ref("personalChats/sharedImages")
+        .child(imageName)
+        .put(blob);
+      await task.then(async (res) => {
+        await res.ref.getDownloadURL().then((res) => {
+          firebase.firestore().collection("personalChats").add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            receiverID: receiverID,
+            senderID: senderID,
+          });
+        });
+      });
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      Alert.alert("Please Try Again", String(error.message));
+    }
+  };
+
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: "#cccccc",
-      }}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : ""}
     >
       <StatusBar style="light" />
-      <KeyboardAvoidingView style={styles.container}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView
+        ref={ScrollToEnd}
+        onContentSizeChange={() => {
+          ScrollToEnd.current.scrollToEnd({
+            animated: true,
+          });
+        }}
+        contentContainerStyle={{ paddingTop: 15 }}
+      >
+        {messages.map(({ id, data }) =>
+          data.sender === senderID ? (
+            <View key={id} style={styles.sender}>
+              <Text style={styles.senderText}>{data.message}</Text>
+            </View>
+          ) : (
+            <View key={id} style={styles.reciever}>
+              <Text style={styles.recieverText}>{data.message}</Text>
+            </View>
+          )
+        )}
+        {/* <Image
+          style={{ width: 200, height: 250 }}
+          source={require("../assets/group.jpg")}
+        /> */}
+      </ScrollView>
+      <View style={styles.footer}>
+        <TextInput
+          value={input}
+          onChangeText={setInput}
+          placeholder="Type..."
+          style={styles.textInput}
+        />
+        {!input ? (
           <>
-            <ScrollView
-              ref={ScrollToEnd}
-              onContentSizeChange={() => {
-                ScrollToEnd.current.scrollToEnd({ animated: true });
-              }}
-              contentContainerStyle={{ paddingTop: 15 }}
-            >
-              {messages.map(({ id, data }) =>
-                data.email === firebase.auth().currentUser.email ? (
-                  <View key={id} style={styles.sender}>
-                    <Avatar
-                      source={{ uri: firebase.auth().currentUser.photoURL }}
-                      rounded
-                      size={28}
-                      position="absolute"
-                      bottom={-17}
-                      right={-5}
-                      containerStyle={{
-                        position: "absolute",
-                        bottom: -15,
-                        right: -5,
-                      }}
-                    />
-                    <Text style={styles.senderText}>{data.message}</Text>
-                  </View>
-                ) : (
-                  <View key={id} style={styles.reciever}>
-                    <Avatar
-                      source={{ uri: route.params.image }}
-                      rounded
-                      size={30}
-                      position="absolute"
-                      bottom={-20}
-                      containerStyle={{
-                        position: "absolute",
-                        bottom: -15,
-                      }}
-                    />
-                    <Text style={styles.recieverText}>{data.message}</Text>
-                    <Text style={styles.recieverName}>{data.displayName}</Text>
-                  </View>
-                )
-              )}
-            </ScrollView>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              style={styles.footer}
-            >
-              <TextInput
-                value={input}
-                onChangeText={setInput}
-                placeholder="Let's Go.."
-                style={styles.textInput}
-                onSubmitEditing={sendMsg}
-              />
-              {!input ? (
-                <>
-                  <TouchableOpacity>
-                    <MaterialIcons name="perm-media" size={25} color="white" />
-                  </TouchableOpacity>
-                  <TouchableOpacity activeOpacity={0.5}>
-                    <MaterialIcons
-                      name="emoji-emotions"
-                      size={25}
-                      color="white"
-                    />
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <TouchableOpacity
-                  disabled={!input}
-                  activeOpacity={0.5}
-                  onPress={sendMsg}
-                >
-                  <MaterialIcons name="send" size={25} color="#2b86e6" />
-                </TouchableOpacity>
-              )}
-            </KeyboardAvoidingView>
+            <TouchableOpacity onPress={getImage}>
+              <MaterialIcons name="perm-media" size={25} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.5}>
+              <MaterialIcons name="emoji-emotions" size={25} color="white" />
+            </TouchableOpacity>
           </>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        ) : (
+          <TouchableOpacity
+            disabled={!input}
+            activeOpacity={0.5}
+            onPress={sendMsg}
+          >
+            <MaterialIcons name="send" size={25} color="#2b86e6" />
+          </TouchableOpacity>
+        )}
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -219,6 +228,7 @@ export default Chats;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#cccccc",
   },
   footer: {
     flexDirection: "row",
@@ -239,49 +249,31 @@ const styles = StyleSheet.create({
     padding: 11,
     backgroundColor: "#ECECEC",
     alignSelf: "flex-end",
-    borderRadius: 15,
-    marginRight: 15,
-    marginBottom: 20,
+    borderRadius: 10,
+    marginRight: 5,
     maxWidth: "80%",
     position: "relative",
-  },
-  senderImage: {
-    alignSelf: "flex-end",
-    borderRadius: 15,
-    marginRight: 15,
-    marginBottom: 20,
-    maxWidth: "80%",
-    position: "relative",
-    borderRadius: 20,
-    width: 180,
-    height: 300,
+    marginBottom: 5,
+    borderTopRightRadius: 1,
   },
   reciever: {
     padding: 10,
     backgroundColor: "#4E342E",
     alignSelf: "flex-start",
-    borderRadius: 15,
+    borderRadius: 10,
     maxWidth: "80%",
     position: "relative",
     borderTopLeftRadius: 1,
     marginLeft: 5,
-    marginBottom: 30,
+    marginBottom: 5,
   },
   senderText: {
     color: "black",
     fontWeight: "500",
+    alignItems: "center",
   },
   recieverText: {
     color: "white",
     fontWeight: "400",
-    marginLeft: 10,
-    paddingBottom: 5,
-  },
-  recieverName: {
-    left: 10,
-    paddingRight: 10,
-    fontSize: 11,
-    fontWeight: "bold",
-    color: "white",
   },
 });

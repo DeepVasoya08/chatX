@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -13,27 +13,16 @@ import { Avatar, Button, Icon, Input } from "react-native-elements";
 import { AntDesign } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { StatusBar } from "expo-status-bar";
-import Constants from "expo-constants";
 
 const EditProfile = ({ navigation }) => {
-  const [image, setImage] = useState(null);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      if (Platform.OS !== "web") {
-        const {
-          status,
-        } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          alert("Sorry, we need media library permissions set profile!");
-        }
-      }
-    })();
-  }, []);
+  const [loadingBody, setLoadingBody] = useState(false);
+  let passwordRef = useRef();
+  let ConfirmpasswordRef = useRef();
+  const currentUserName = firebase.auth().currentUser.displayName;
 
   const getImage = async () => {
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
@@ -45,7 +34,6 @@ const EditProfile = ({ navigation }) => {
     if (pickerResult.cancelled) {
       return;
     }
-    setImage({ uri: pickerResult.uri });
     setLoading(true);
     try {
       const response = await fetch(pickerResult.uri);
@@ -71,19 +59,62 @@ const EditProfile = ({ navigation }) => {
         });
       });
       setLoading(false);
-      setImage(null);
-      Alert.alert("Profile Updated", "Profile Updated Sucessfully");
     } catch (error) {
+      setLoading(false);
       Alert.alert("Please Try Again", String(error.message));
     }
   };
 
-  const setProfile = () => {
-    // if (image !== null) {
-    //   firebase.auth().currentUser.updateProfile({
-    //     photoURL: photoUrl,
-    //   });
-    // }
+  const setProfile = async () => {
+    setLoadingBody(true);
+    try {
+      if (name != "") {
+        firebase
+          .auth()
+          .currentUser.updateProfile({
+            displayName: name,
+          })
+          .then(() => {
+            firebase
+              .firestore()
+              .collection("userDetails")
+              .doc(firebase.auth().currentUser.uid)
+              .set({ name: name }, { merge: true });
+            setLoadingBody(false);
+          })
+          .catch(
+            (e) => Alert.alert("Something went wrong", String(e.message)),
+            setLoadingBody(false)
+          );
+      }
+      if (!password == "" && password === confirmpassword) {
+        await firebase
+          .auth()
+          .currentUser.updateProfile({
+            displayName: name ? name : currentUserName,
+          })
+          .then(() => {
+            firebase
+              .firestore()
+              .collection("userDetails")
+              .doc(firebase.auth().currentUser.uid)
+              .set(name ? name : currentUserName, { merge: true });
+          });
+        await firebase
+          .auth()
+          .currentUser.updatePassword(password)
+          .then(() => {
+            firebase
+              .firestore()
+              .collection("userDetails")
+              .doc(firebase.auth().currentUser.uid)
+              .set({ password: password }, { merge: true });
+          });
+      }
+    } catch (error) {
+      Alert.alert("Something went wrong", String(error));
+      setLoadingBody(false);
+    }
   };
 
   useLayoutEffect(() => {
@@ -109,27 +140,36 @@ const EditProfile = ({ navigation }) => {
     >
       <StatusBar style="dark" />
       <View style={styles.avatarStyle}>
-        <Avatar
-          rounded
-          source={{
-            uri: firebase.auth().currentUser.photoURL,
-          }}
-          size="large"
-          onPress={getImage}
-        >
-          {loading && <ActivityIndicator size="large" color="black" />}
-          <Avatar.Accessory
-            size={28}
-            style={{ marginLeft: -10 }}
-            onPress={getImage}
+        {loading ? (
+          <ActivityIndicator
+            style={{
+              display: "flex",
+              flex: 1,
+              marginTop: 50,
+            }}
+            size={45}
+            color="gray"
           />
-        </Avatar>
+        ) : (
+          <Avatar
+            rounded
+            source={{ uri: firebase.auth().currentUser.photoURL }}
+            size="large"
+            onPress={getImage}
+          >
+            <Avatar.Accessory
+              size={28}
+              style={{ marginLeft: -10 }}
+              onPress={getImage}
+            />
+          </Avatar>
+        )}
       </View>
       <View style={styles.inputStyles}>
         <Input
           style={{ color: "black" }}
-          defaultValue={firebase.auth().currentUser.displayName}
-          placeholder={firebase.auth().currentUser.displayName}
+          defaultValue={currentUserName}
+          placeholder={currentUserName}
           // autoFocus={true}
           value={name}
           onChangeText={setName}
@@ -143,8 +183,12 @@ const EditProfile = ({ navigation }) => {
             />
           }
           returnKeyType="next"
+          onSubmitEditing={() => {
+            passwordRef.current.focus();
+          }}
         />
         <Input
+          ref={passwordRef}
           style={{ color: "black" }}
           secureTextEntry={true}
           placeholder="Password"
@@ -160,8 +204,12 @@ const EditProfile = ({ navigation }) => {
             />
           }
           returnKeyType="next"
+          onSubmitEditing={() => {
+            ConfirmpasswordRef.current.focus();
+          }}
         />
         <Input
+          ref={ConfirmpasswordRef}
           style={{ color: "black" }}
           secureTextEntry={true}
           placeholder="Confirm Password"
@@ -176,14 +224,16 @@ const EditProfile = ({ navigation }) => {
               style={{ marginRight: 10 }}
             />
           }
+          returnKeyType="done"
           onSubmitEditing={setProfile}
         />
         <View style={{ marginTop: 10 }}>
           <Button
-            disabled={!name}
+            disabled={!name && !password}
             title="Update"
             buttonStyle={styles.buttonStyle}
             onPress={setProfile}
+            loading={loadingBody ? true : false}
           />
         </View>
       </View>

@@ -6,8 +6,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import thunk from "redux-thunk";
 import firebase from "firebase";
 import rootReducer from "./redux/reducers";
-import LandingScreen from "./components/auth/LandingScreen";
-import { SafeAreaView, ActivityIndicator } from "react-native";
+import SignIn from "./components/auth/SignIn";
+import { SafeAreaView, ActivityIndicator, Platform, Alert } from "react-native";
 import Register from "./components/auth/Register";
 import Home from "./screens/Home";
 import Chats from "./screens/Chats";
@@ -17,6 +17,8 @@ import Main from "./components/Main";
 import PersonalChats from "./screens/PersonalChats";
 import EnterPersonalChats from "./screens/EnterPersonalChats";
 import EditProfile from "./screens/EditProfile";
+import * as ImagePicker from "expo-image-picker";
+import NetInfo from "@react-native-community/netinfo";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAv1k76wYdIABL-pWgN9_pR1LyjpD0D8jM",
@@ -56,7 +58,25 @@ export class App extends Component {
           loaded: true,
         });
       }
-    });
+    }),
+      (async () => {
+        if (Platform.OS !== "web") {
+          const {
+            status,
+          } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== "granted") {
+            alert("Sorry, we need media library permissions set profile!");
+          }
+        }
+      })();
+    // async () => {
+    //   NetInfo.fetch().then((state) => {
+    //     console.log("Connection type", state.type);
+    //     console.log("Is connected?", state.isConnected);
+    //     console.log(state.type);
+    //     Alert.prompt("test", state.isConnected);
+    //   })();
+    // };
   }
 
   render() {
@@ -73,8 +93,8 @@ export class App extends Component {
         <NavigationContainer>
           <Stack.Navigator>
             <Stack.Screen
-              name="LandingScreen"
-              component={LandingScreen}
+              name="SignIn"
+              component={SignIn}
               options={{ headerShown: false }}
             />
             <Stack.Screen
@@ -83,6 +103,7 @@ export class App extends Component {
               options={{
                 headerStyle: { backgroundColor: "gray" },
                 headerTintColor: "white",
+                headerShown: false,
               }}
             />
           </Stack.Navigator>
@@ -108,6 +129,7 @@ export class App extends Component {
             />
             <Stack.Screen name="AddRoom" component={AddRoom} />
             <Stack.Screen name="EditProfile" component={EditProfile} />
+            {/* <Stack.Screen name="EditProfile" component={EditProfile} /> */}
           </Stack.Navigator>
         </NavigationContainer>
       </Provider>
