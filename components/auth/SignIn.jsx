@@ -33,6 +33,8 @@ const SignIn = ({ navigation }) => {
     });
   };
 
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
   const signIn = () => {
     setLoading(true);
     firebase
@@ -58,7 +60,7 @@ const SignIn = ({ navigation }) => {
             keyboardType="email-address"
             autoCapitalize="none"
             autoCompleteType="email"
-            // autoFocus={true}
+            autoFocus={true}
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
@@ -67,8 +69,8 @@ const SignIn = ({ navigation }) => {
             }}
             returnKeyType="next"
           />
-          {email ? (
-            <Animatable.View animation="bounceIn" useNativeDriver={true}>
+          {email.match(re) != null ? (
+            <Animatable.View animation="bounceIn">
               <Feather name="check-circle" color="green" size={20} />
             </Animatable.View>
           ) : null}

@@ -7,29 +7,76 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  Linking,
+  ToastAndroid,
 } from "react-native";
 import firebase from "firebase";
-import { Avatar, Button, Icon, Input } from "react-native-elements";
-import { AntDesign } from "@expo/vector-icons";
+import { Avatar } from "react-native-elements";
+import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { StatusBar } from "expo-status-bar";
+import {
+  FontAwesome,
+  Feather,
+  MaterialIcons,
+  Zocial,
+  Ionicons,
+} from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
+import * as Animatable from "react-native-animatable";
 
 const EditProfile = ({ navigation }) => {
   const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmpassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingBody, setLoadingBody] = useState(false);
-  let passwordRef = useRef();
-  let ConfirmpasswordRef = useRef();
+  const [selected, setSelected] = useState("");
+  let openKeyboard = useRef();
   const currentUserName = firebase.auth().currentUser.displayName;
+  const windowWidth = Math.round(useWindowDimensions().width);
+  const windowHeight = Math.round(useWindowDimensions().height);
+
+  const openGithub = async () => {
+    try {
+      await Linking.openURL("https://github.com/DeepVasoya08");
+    } catch (error) {
+      Alert.alert("Something went wrong", String(error.message));
+    }
+  };
+
+  const openLinkedin = async () => {
+    try {
+      await Linking.openURL(
+        "https://www.linkedin.com/in/deep-vasoya-ba88131aa/"
+      );
+    } catch (error) {
+      Alert.alert("Something went wrong", String(error.message));
+    }
+  };
+  const openWhatsapp = async () => {
+    if (Platform.OS === "web") {
+      await Linking.openURL(
+        "https://whatsapp08d.web.app/rooms/bF8aweIok60NVgfrQ5FR"
+      );
+    } else {
+      alert("open in desktop for better experience");
+    }
+  };
+  const openFacebook = async () => {
+    if (Platform.OS === "web") {
+      await Linking.openURL("https://facebookclone00.web.app/");
+    } else {
+      alert("open in desktop for better experience");
+    }
+  };
 
   const getImage = async () => {
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaType: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
+      quality: 0,
     });
     if (pickerResult.cancelled) {
       return;
@@ -55,7 +102,7 @@ const EditProfile = ({ navigation }) => {
             .firestore()
             .collection("userDetails")
             .doc(firebase.auth().currentUser.uid)
-            .set({ image: res }, { merge: true });
+            .set({ photoURL: res }, { merge: true });
         });
       });
       setLoading(false);
@@ -65,11 +112,11 @@ const EditProfile = ({ navigation }) => {
     }
   };
 
-  const setProfile = async () => {
+  const changeName = async () => {
     setLoadingBody(true);
     try {
       if (name != "") {
-        firebase
+        await firebase
           .auth()
           .currentUser.updateProfile({
             displayName: name,
@@ -81,38 +128,54 @@ const EditProfile = ({ navigation }) => {
               .doc(firebase.auth().currentUser.uid)
               .set({ name: name }, { merge: true });
             setLoadingBody(false);
-          })
-          .catch(
-            (e) => Alert.alert("Something went wrong", String(e.message)),
-            setLoadingBody(false)
-          );
-      }
-      if (!password == "" && password === confirmpassword) {
-        await firebase
-          .auth()
-          .currentUser.updateProfile({
-            displayName: name ? name : currentUserName,
-          })
-          .then(() => {
-            firebase
-              .firestore()
-              .collection("userDetails")
-              .doc(firebase.auth().currentUser.uid)
-              .set(name ? name : currentUserName, { merge: true });
+            setName("");
           });
-        await firebase
-          .auth()
-          .currentUser.updatePassword(password)
-          .then(() => {
-            firebase
-              .firestore()
-              .collection("userDetails")
-              .doc(firebase.auth().currentUser.uid)
-              .set({ password: password }, { merge: true });
-          });
+      } else {
+        Alert.alert(
+          "Something went wrong",
+          "can't connect to server, please check your connnection!"
+        );
+        setLoadingBody(false);
       }
     } catch (error) {
-      Alert.alert("Something went wrong", String(error));
+      Alert.alert(
+        "Something went wrong",
+        "can't connect to server, please check your connnection!"
+      );
+      setLoadingBody(false);
+    }
+  };
+
+  const updateStatus = async () => {
+    setLoadingBody(true);
+    try {
+      if (selected) {
+        await firebase
+          .firestore()
+          .collection("userDetails")
+          .doc(firebase.auth().currentUser.uid)
+          .set({ status: selected }, { merge: true })
+          .then(() => {
+            setTimeout(() => {
+              setLoadingBody(false);
+            }, 1000);
+          })
+          .catch(() => {
+            setLoadingBody(false);
+            Alert.alert(
+              "Something went wrong",
+              "can't connect to server, please check your connnection!"
+            );
+          });
+      } else {
+        Alert.alert(
+          "Something went wrong",
+          "can't connect to server, please check your connnection!"
+        );
+        setLoading(false);
+      }
+    } catch (error) {
+      Alert.alert("Something went wrong", String(error.message));
       setLoadingBody(false);
     }
   };
@@ -136,7 +199,7 @@ const EditProfile = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : ""}
     >
       <StatusBar style="dark" />
       <View style={styles.avatarStyle}>
@@ -148,13 +211,13 @@ const EditProfile = ({ navigation }) => {
               marginTop: 50,
             }}
             size={45}
-            color="gray"
+            color="blue"
           />
         ) : (
           <Avatar
             rounded
             source={{ uri: firebase.auth().currentUser.photoURL }}
-            size="large"
+            size={150}
             onPress={getImage}
           >
             <Avatar.Accessory
@@ -165,76 +228,221 @@ const EditProfile = ({ navigation }) => {
           </Avatar>
         )}
       </View>
-      <View style={styles.inputStyles}>
-        <Input
-          style={{ color: "black" }}
-          defaultValue={currentUserName}
-          placeholder={currentUserName}
-          // autoFocus={true}
-          value={name}
-          onChangeText={setName}
-          leftIcon={
-            <Icon
-              name="user"
-              type="font-awesome"
-              size={28}
-              color="black"
-              style={{ marginRight: 10 }}
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          paddingLeft: 50,
+          paddingTop: 30,
+        }}
+      >
+        <TouchableOpacity
+          style={{ flexDirection: "row", alignItems: "center" }}
+          onPress={() => openKeyboard.current.focus() && openKeyboard.focus()}
+        >
+          <View style={{ marginRight: 15 }}>
+            <FontAwesome name="user-circle-o" color="#05375a" size={20} />
+          </View>
+          <View>
+            <Text style={{ fontWeight: "600", fontSize: 17 }}>Name</Text>
+            <TextInput
+              ref={openKeyboard}
+              placeholder={currentUserName}
+              value={name}
+              onChangeText={setName}
             />
-          }
-          returnKeyType="next"
-          onSubmitEditing={() => {
-            passwordRef.current.focus();
-          }}
-        />
-        <Input
-          ref={passwordRef}
-          style={{ color: "black" }}
-          secureTextEntry={true}
-          placeholder="Password"
-          onChangeText={setPassword}
-          value={password}
-          leftIcon={
-            <Icon
-              name="key"
-              type="octicon"
-              size={28}
-              color="black"
-              style={{ marginRight: 10 }}
-            />
-          }
-          returnKeyType="next"
-          onSubmitEditing={() => {
-            ConfirmpasswordRef.current.focus();
-          }}
-        />
-        <Input
-          ref={ConfirmpasswordRef}
-          style={{ color: "black" }}
-          secureTextEntry={true}
-          placeholder="Confirm Password"
-          onChangeText={setConfirmPassword}
-          value={confirmpassword}
-          leftIcon={
-            <Icon
-              name="key"
-              type="octicon"
-              size={28}
-              color="black"
-              style={{ marginRight: 10 }}
-            />
-          }
-          returnKeyType="done"
-          onSubmitEditing={setProfile}
-        />
-        <View style={{ marginTop: 10 }}>
-          <Button
-            disabled={!name && !password}
-            title="Update"
-            buttonStyle={styles.buttonStyle}
-            onPress={setProfile}
-            loading={loadingBody ? true : false}
+          </View>
+        </TouchableOpacity>
+        {!name ? (
+          <View style={{ marginLeft: windowWidth / 2 }}>
+            <FontAwesome name="pencil" size={20} color="black" />
+          </View>
+        ) : !loadingBody ? (
+          <TouchableOpacity onPress={changeName}>
+            <Animatable.View
+              animation="flipInY"
+              duration={200}
+              style={{ marginLeft: windowWidth / 2 }}
+            >
+              <Ionicons
+                name="checkmark-done-circle"
+                size={30}
+                color="#4cd806"
+              />
+            </Animatable.View>
+          </TouchableOpacity>
+        ) : (
+          <ActivityIndicator
+            style={{ marginLeft: windowWidth / 2 }}
+            size="small"
+            color="blue"
           />
+        )}
+      </View>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          paddingLeft: 50,
+          paddingTop: 20,
+        }}
+      >
+        <View style={{ marginRight: 10 }}>
+          <Zocial name="statusnet" size={25} color="#05375a" />
+        </View>
+        <View>
+          <Text style={{ fontWeight: "600", fontSize: 17 }}>
+            Mood: {selected}
+          </Text>
+          <Picker
+            style={{ minWidth: 110 }}
+            mode="dialog"
+            selectedValue={selected}
+            onValueChange={(itemValue, itemIndex) => setSelected(itemValue)}
+          >
+            <Picker.Item label="Select" />
+            <Picker.Item label="Sad" value="Sad😥" />
+            <Picker.Item label="Happy" value="Happy🙂" />
+            <Picker.Item label="Chilling" value="Chilling😉" />
+            <Picker.Item label="Busy" value="Busy⌚" />
+            <Picker.Item label="Sleepy" value="Sleepy😪" />
+          </Picker>
+        </View>
+        {selected ? (
+          <TouchableOpacity onPress={updateStatus}>
+            <Animatable.View
+              animation="lightSpeedIn"
+              style={{ marginLeft: windowWidth / 4 }}
+            >
+              <Ionicons
+                name="checkmark-done-circle"
+                size={35}
+                color="#4cd806"
+              />
+            </Animatable.View>
+          </TouchableOpacity>
+        ) : loadingBody ? (
+          <ActivityIndicator
+            style={{ marginLeft: windowWidth / 3 }}
+            size="small"
+            color="blue"
+          />
+        ) : null}
+      </View>
+      <TouchableOpacity onPress={() => navigation.push("ChangePass")}>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            paddingLeft: 50,
+            paddingTop: 20,
+            paddingBottom: 10,
+          }}
+        >
+          <View style={{ marginRight: 10 }}>
+            <Feather name="settings" color="#05375a" size={24} />
+          </View>
+          <View>
+            <Text style={{ fontWeight: "600", fontSize: 17 }}>Settings</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => firebase.auth().signOut()}>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            paddingLeft: 50,
+            paddingTop: 20,
+          }}
+        >
+          <View style={{ marginRight: 10 }}>
+            <MaterialIcons name="logout" size={24} color="#05375a" />
+          </View>
+          <View>
+            <Text style={{ fontWeight: "600", fontSize: 17 }}>Logout</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-evenly",
+          marginTop: windowHeight / 10,
+        }}
+      >
+        <View>
+          <Text
+            style={{
+              fontStyle: "italic",
+              fontWeight: "bold",
+              fontSize: 18,
+            }}
+          >
+            Visit Me:
+          </Text>
+        </View>
+        <View>
+          <TouchableOpacity
+            onPress={openGithub}
+            onLongPress={() =>
+              ToastAndroid.showWithGravity(
+                "Github",
+                ToastAndroid.SHORT,
+                ToastAndroid.BOTTOM
+              )
+            }
+          >
+            <AntDesign name="github" size={28} color="black" />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <TouchableOpacity
+            onPress={openLinkedin}
+            onLongPress={() =>
+              ToastAndroid.showWithGravity(
+                "Linkedin",
+                ToastAndroid.SHORT,
+                ToastAndroid.BOTTOM
+              )
+            }
+          >
+            <AntDesign name="linkedin-square" size={28} color="black" />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <TouchableOpacity
+            onPress={openWhatsapp}
+            onLongPress={() =>
+              ToastAndroid.showWithGravity(
+                "Whatsapp clone",
+                ToastAndroid.SHORT,
+                ToastAndroid.BOTTOM
+              )
+            }
+          >
+            <FontAwesome5 name="whatsapp-square" size={29} color="black" />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <TouchableOpacity
+            onPress={openFacebook}
+            onLongPress={() =>
+              ToastAndroid.showWithGravity(
+                "Facebook clone",
+                ToastAndroid.SHORT,
+                ToastAndroid.BOTTOM
+              )
+            }
+          >
+            <AntDesign name="facebook-square" size={28} color="black" />
+          </TouchableOpacity>
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -250,17 +458,10 @@ const styles = StyleSheet.create({
   },
   avatarStyle: {
     alignItems: "center",
-    marginVertical: 5,
+    marginVertical: 3,
   },
   inputStyles: {
     display: "flex",
-    margin: 5,
-    justifyContent: "center",
-    marginTop: 35,
-  },
-  buttonStyle: {
-    width: 200,
-    borderRadius: 20,
-    alignSelf: "center",
+    flex: 1,
   },
 });

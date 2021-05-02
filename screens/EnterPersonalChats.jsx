@@ -8,23 +8,22 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from "react-native";
 import { Avatar } from "react-native-elements";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import firebase from "firebase";
 import * as ImagePicker from "expo-image-picker";
-import { ActivityIndicator } from "react-native";
-import { Image } from "react-native";
+import * as emojis from "react-native-emoji-input";
 
 const Chats = ({ navigation, route }) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
-  const [imageshr, setImage] = useState([]);
-  const [loading, setLoading] = useState(false);
   let ScrollToEnd = useRef();
+  let openEmoji = useRef();
   const senderID = firebase.auth().currentUser.uid;
-  const receiverID = route.params.id;
+  const receiverID = route.params.id.id;
 
   const sorted =
     senderID < receiverID ? senderID + receiverID : receiverID + senderID;
@@ -76,15 +75,27 @@ const Chats = ({ navigation, route }) => {
         >
           <Avatar
             rounded
-            source={{
-              uri:
-                route.params.image ||
-                "https://cencup.com/wp-content/uploads/2019/07/avatar-placeholder.png",
-            }}
+            source={
+              !route.params.id.photoURL
+                ? require("../assets/avatar-placeholder.png")
+                : { uri: route.params.id.photoURL }
+            }
           />
-          <Text style={{ color: "white", marginLeft: 10, fontWeight: "700" }}>
-            {route.params.name}
-          </Text>
+          <View style={{ flexDirection: "column" }}>
+            <Text style={{ color: "white", marginLeft: 10, fontWeight: "700" }}>
+              {route.params.id.name}
+            </Text>
+            <Text
+              style={{
+                color: "white",
+                marginLeft: 10,
+                fontWeight: "200",
+                fontSize: 12,
+              }}
+            >
+              {route.params.id.status}
+            </Text>
+          </View>
         </View>
       ),
       headerLeft: () => (
@@ -125,40 +136,45 @@ const Chats = ({ navigation, route }) => {
   }, [navigation, messages]);
 
   const getImage = async () => {
-    const pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaType: ImagePicker.MediaTypeOptions.Images,
+    const picker = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1],
       quality: 1,
     });
-    if (pickerResult.cancelled) {
+    if (picker.cancelled) {
       return;
     }
-    setLoading(true);
     try {
-      const response = await fetch(pickerResult.uri);
+      const response = await fetch(picker.uri);
       const blob = await response.blob();
-      const imageName = pickerResult.uri.substring(
-        pickerResult.uri.lastIndexOf("/") + 1
-      );
+      const imgName = picker.uri.substring(picker.uri.lastIndexOf("/") + 1);
       const task = firebase
         .storage()
-        .ref("personalChats/sharedImages")
-        .child(imageName)
+        .ref("personalChats/sharedImg")
+        .child(imgName)
         .put(blob);
       await task.then(async (res) => {
-        await res.ref.getDownloadURL().then((res) => {
-          firebase.firestore().collection("personalChats").add({
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            receiverID: receiverID,
-            senderID: senderID,
+        await res.ref
+          .getDownloadURL()
+          .then((uri) => {
+            firebase
+              .firestore()
+              .collection("personalChats")
+              .doc(sorted)
+              .collection("messages")
+              .add({
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                sender: senderID,
+                reciever: receiverID,
+                image: uri,
+              });
+          })
+          .catch((err) => {
+            alert(err.message);
           });
-        });
       });
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      Alert.alert("Please Try Again", String(error.message));
+    } catch (err) {
+      alert("please try again!");
     }
   };
 
@@ -179,22 +195,41 @@ const Chats = ({ navigation, route }) => {
       >
         {messages.map(({ id, data }) =>
           data.sender === senderID ? (
-            <View key={id} style={styles.sender}>
-              <Text style={styles.senderText}>{data.message}</Text>
+            <View
+              key={id}
+              style={data.message ? styles.sender : styles.senderImg}
+            >
+              {data.message ? (
+                <Text style={styles.senderText}>{data.message}</Text>
+              ) : (
+                <Image
+                  loadingIndicatorSource={require("../assets/logo.png")}
+                  style={{ width: 170, height: 300, borderRadius: 12 }}
+                  source={{ uri: data.image }}
+                />
+              )}
             </View>
           ) : (
-            <View key={id} style={styles.reciever}>
-              <Text style={styles.recieverText}>{data.message}</Text>
+            <View
+              key={id}
+              style={data.message ? styles.reciever : styles.recieverImg}
+            >
+              {data.message ? (
+                <Text style={styles.recieverText}>{data.message}</Text>
+              ) : (
+                <Image
+                  loadingIndicatorSource={require("../assets/logo.png")}
+                  style={{ width: 170, height: 300, borderRadius: 12 }}
+                  source={{ uri: data.image }}
+                />
+              )}
             </View>
           )
         )}
-        {/* <Image
-          style={{ width: 200, height: 250 }}
-          source={require("../assets/group.jpg")}
-        /> */}
       </ScrollView>
       <View style={styles.footer}>
         <TextInput
+          // ref={openEmoji}
           value={input}
           onChangeText={setInput}
           placeholder="Type..."
@@ -206,7 +241,12 @@ const Chats = ({ navigation, route }) => {
               <MaterialIcons name="perm-media" size={25} color="white" />
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={0.5}>
-              <MaterialIcons name="emoji-emotions" size={25} color="white" />
+              <MaterialIcons
+                onPress={() => openEmoji.current.focus()}
+                name="emoji-emotions"
+                size={25}
+                color="white"
+              />
             </TouchableOpacity>
           </>
         ) : (
@@ -256,6 +296,18 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     borderTopRightRadius: 1,
   },
+  senderImg: {
+    padding: 10,
+    alignSelf: "flex-end",
+    maxWidth: "80%",
+    position: "relative",
+    marginBottom: 5,
+  },
+  senderText: {
+    color: "black",
+    fontWeight: "500",
+    alignItems: "center",
+  },
   reciever: {
     padding: 10,
     backgroundColor: "#4E342E",
@@ -267,10 +319,12 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     marginBottom: 5,
   },
-  senderText: {
-    color: "black",
-    fontWeight: "500",
-    alignItems: "center",
+  recieverImg: {
+    padding: 10,
+    alignSelf: "flex-start",
+    maxWidth: "80%",
+    position: "relative",
+    marginBottom: 5,
   },
   recieverText: {
     color: "white",

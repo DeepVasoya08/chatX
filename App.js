@@ -19,6 +19,7 @@ import EnterPersonalChats from "./screens/EnterPersonalChats";
 import EditProfile from "./screens/EditProfile";
 import * as ImagePicker from "expo-image-picker";
 import NetInfo from "@react-native-community/netinfo";
+import ChangePass from "./screens/ChangePass";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAv1k76wYdIABL-pWgN9_pR1LyjpD0D8jM",
@@ -129,6 +130,7 @@ export class App extends Component {
             />
             <Stack.Screen name="AddRoom" component={AddRoom} />
             <Stack.Screen name="EditProfile" component={EditProfile} />
+            <Stack.Screen name="ChangePass" component={ChangePass} />
             {/* <Stack.Screen name="EditProfile" component={EditProfile} /> */}
           </Stack.Navigator>
         </NavigationContainer>

@@ -7,26 +7,38 @@ import firebase from "firebase";
 
 const AddRoom = ({ navigation }) => {
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: "Create Group",
+      title: "Create Room",
       headerStyle: { backgroundColor: "#ecf0f1" },
       headerBackTitle: "Back",
     });
   }, []);
 
   const createRoom = async () => {
+    setLoading(true);
     await firebase
       .firestore()
       .collection("roomChats")
       .add({
         RoomName: input,
+        admin: firebase.auth().currentUser.displayName,
+        adminID: firebase.auth().currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       })
       .then(() => {
+        setLoading(false);
         navigation.goBack();
       })
-      .catch((err) => Alert.alert(String(err)));
+      .catch(() => {
+        Alert.alert(
+          "Something went wrong",
+          "Can't connect to server, please try agian!"
+        );
+        setLoading(false);
+      });
   };
 
   return (
@@ -35,15 +47,26 @@ const AddRoom = ({ navigation }) => {
       <Input
         autoFocus={true}
         style={{ color: "black" }}
-        placeholder="Enter Group Name"
+        placeholder="Enter Room Name"
         value={input}
         onChangeText={setInput}
         leftIcon={
-          <Icon name="group" type="antdesign" size={24} color="black" />
+          <Icon
+            style={{ marginRight: 2 }}
+            name="group"
+            type="antdesign"
+            size={24}
+            color="black"
+          />
         }
         onSubmitEditing={createRoom}
       />
-      <Button disabled={!input} onPress={createRoom} title="Create" />
+      <Button
+        disabled={!input}
+        loading={loading ? true : false}
+        onPress={createRoom}
+        title="Create"
+      />
     </View>
   );
 };

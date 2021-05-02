@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import React from "react";
+import { View, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Menu, { MenuItem, MenuDivider } from "react-native-material-menu";
 import firebase from "firebase";
@@ -14,29 +14,45 @@ const PopUp = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Menu
-        animationDuration={100}
+        animationDuration={50}
         ref={(ref) => (_menu = ref)}
         button={
-          <TouchableOpacity
-            activeOpacity={0.5}
-            style={{ marginRight: -15 }}
+          <Feather
+            style={{ marginRight: -13 }}
             onPress={() => _menu.show()}
-          >
-            <Feather
-              onPress={() => _menu.show()}
-              name="more-vertical"
-              size={28}
-              color="black"
-            />
-          </TouchableOpacity>
+            name="more-vertical"
+            size={28}
+            color="black"
+          />
         }
       >
-        <MenuItem onPress={() => navigation.push("AddRoom")}>
-          New group
+        <MenuItem
+          ref={(ref) => (_menu = ref)}
+          onPress={() => {
+            navigation.navigate("AddRoom");
+            _menu.hide();
+          }}
+        >
+          New Room
         </MenuItem>
         <MenuDivider />
-        <MenuItem onPress={() => navigation.push("EditProfile")}>
+        <MenuItem
+          ref={(ref) => (_menu = ref)}
+          onPress={() => {
+            navigation.navigate("EditProfile");
+            _menu.hide();
+          }}
+        >
           Profile
+        </MenuItem>
+        <MenuItem
+          ref={(ref) => (_menu = ref)}
+          onPress={() => {
+            navigation.navigate("ChangePass");
+            _menu.hide();
+          }}
+        >
+          Settings
         </MenuItem>
         <MenuDivider />
         <MenuItem onPress={signOut}>Logout</MenuItem>

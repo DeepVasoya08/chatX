@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TextInput,
   Text,
-  SafeAreaView,
   TouchableOpacity,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -14,6 +13,7 @@ import firebase from "firebase";
 import { Button } from "react-native-elements";
 import * as Animatable from "react-native-animatable";
 import { FontAwesome, Feather } from "@expo/vector-icons";
+import { KeyboardAvoidingView } from "react-native";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -23,6 +23,7 @@ const Register = () => {
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState({
     secureTextEntry: true,
+    ConfirmsecureTextEntry: true,
   });
   let emailRef = useRef();
   let passwordRef = useRef();
@@ -34,6 +35,15 @@ const Register = () => {
       secureTextEntry: !data.secureTextEntry,
     });
   };
+
+  const ConfirmupdataTogglePassword = () => {
+    setData({
+      ...data,
+      ConfirmsecureTextEntry: !data.ConfirmsecureTextEntry,
+    });
+  };
+
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   const register = async () => {
     setLoading(true);
@@ -53,26 +63,33 @@ const Register = () => {
             .firestore()
             .collection("userDetails")
             .doc(firebase.auth().currentUser.uid)
-            .set({ email, name, password });
+            .set({
+              name,
+              email,
+              password,
+              status: "Just Joined!",
+            });
+          setLoading(false);
         })
-        .catch(
-          setLoading(false),
-          Alert.alert(String(error.code), String(error.message))
-        );
+        .catch((e) => {
+          setLoading(false);
+          Alert.alert("Something went wrong", String(e));
+        });
     } else {
       setLoading(false);
       Alert.alert("Bad Password", "Password does not match");
     }
-    setLoading(false);
   };
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : ""}
+      style={styles.container}
+    >
       <StatusBar style="light" />
       <View style={styles.header}>
         <Text style={styles.text_header}>Sign Up</Text>
       </View>
       <Animatable.View style={styles.footer} animation="fadeInUpBig">
-        <Text style={styles.text_footer}>Name</Text>
         <View style={styles.action}>
           <FontAwesome name="user-o" color="#05375a" size={20} />
           <TextInput
@@ -87,7 +104,6 @@ const Register = () => {
             }}
           />
         </View>
-        <Text style={[styles.text_footer, { marginTop: 20 }]}>Email</Text>
         <View style={styles.action}>
           <FontAwesome name="user-o" color="#05375a" size={20} />
           <TextInput
@@ -104,15 +120,19 @@ const Register = () => {
               passwordRef.current.focus() && passwordRef.focus();
             }}
           />
+          {email.match(re) != null ? (
+            <Animatable.View animation="bounceIn">
+              <Feather name="check-circle" color="green" size={20} />
+            </Animatable.View>
+          ) : null}
         </View>
-        <Text style={[styles.text_footer, { marginTop: 20 }]}>Password</Text>
         <View style={styles.action}>
           <Feather name="lock" color="#05375a" size={20} />
           <TextInput
             placeholder="Password"
             style={styles.text_input}
             ref={passwordRef}
-            secureTextEntry
+            secureTextEntry={data.secureTextEntry ? true : false}
             value={password}
             onChangeText={setPassword}
             returnKeyType="next"
@@ -128,23 +148,20 @@ const Register = () => {
             )}
           </TouchableOpacity>
         </View>
-        <Text style={[styles.text_footer, { marginTop: 20 }]}>
-          Confirm Password
-        </Text>
         <View style={styles.action}>
           <Feather name="lock" color="#05375a" size={20} />
           <TextInput
             style={styles.text_input}
             ref={confirmPasswordRef}
-            secureTextEntry
+            secureTextEntry={data.ConfirmsecureTextEntry ? true : false}
             placeholder="Confirm Password"
             type="password"
             value={confirmpassword}
             onChangeText={setConfirmPassword}
             returnKeyType="done"
           />
-          <TouchableOpacity onPress={updataTogglePassword}>
-            {data.secureTextEntry ? (
+          <TouchableOpacity onPress={ConfirmupdataTogglePassword}>
+            {data.ConfirmsecureTextEntry ? (
               <Feather name="eye-off" color="#05375a" size={20} />
             ) : (
               <Feather name="eye" color="#05375a" size={20} />
@@ -163,7 +180,7 @@ const Register = () => {
           />
         </View>
       </Animatable.View>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -211,11 +228,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#f2f2f2",
-    paddingBottom: 5,
+    paddingBottom: 20,
   },
   text_input: {
     flex: 1,
-    marginTop: Platform.OS === "ios" ? 0 : -10,
     paddingLeft: 10,
     color: "#05375a",
   },

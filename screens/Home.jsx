@@ -1,10 +1,16 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import {
   View,
   SafeAreaView,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import { Avatar } from "react-native-elements";
 import { StatusBar } from "expo-status-bar";
@@ -19,6 +25,18 @@ const Home = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const [userChats, setUserChats] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const wait = (timeout) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    wait(2000).then(() => setRefreshing(false));
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -60,7 +78,7 @@ const Home = ({ navigation }) => {
       headerTintColor: "black",
       headerLeft: () => (
         <View style={{ marginLeft: 20 }}>
-          <TouchableOpacity onPress={() => navigation.push("EditProfile")}>
+          <TouchableOpacity onPress={() => navigation.navigate("EditProfile")}>
             <Avatar
               rounded
               source={{
@@ -76,7 +94,7 @@ const Home = ({ navigation }) => {
             flexDirection: "row",
             justifyContent: "flex-end",
             alignItems: "center",
-            width: 75,
+            width: 40,
             marginRight: 15,
           }}
         >
@@ -89,14 +107,14 @@ const Home = ({ navigation }) => {
   }, [navigation]);
 
   const enterChat = (id, RoomName) => {
-    navigation.push("Chats", {
+    navigation.navigate("Chats", {
       id: id,
       RoomName: RoomName,
     });
   };
 
   const enterPersonalChat = (id, name, image) => {
-    navigation.push("EnterPersonalChats", {
+    navigation.navigate("EnterPersonalChats", {
       id: id,
       name: name,
       image: image,
@@ -125,21 +143,34 @@ const Home = ({ navigation }) => {
         }}
       >
         <StatusBar style="dark" />
-        <ScrollView style={styles.container}>
-          {chats.map(({ id, data: { RoomName } }) => (
+        <ScrollView
+          style={styles.container}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#a9a9a9", "#dc143c", "#00ced1", "#7cfc00", "#00ff00"]}
+            />
+          }
+        >
+          {chats.map(({ id, data: { RoomName, admin, adminID } }) => (
             <RoomChats
               key={id}
               id={id}
               RoomName={RoomName}
               enterChat={enterChat}
+              admin={admin}
+              adminID={adminID}
             />
           ))}
-          {userChats.map(({ id, data: { name, image } }) => (
+          {userChats.map(({ id, data: { name, photoURL, status } }) => (
             <PersonalChats
               key={id}
               id={id}
               name={name}
-              image={image}
+              photoURL={photoURL}
+              status={status}
+              navigation={navigation}
               enterPersonalChat={enterPersonalChat}
             />
           ))}
