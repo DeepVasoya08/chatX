@@ -87,7 +87,7 @@ const Chats = ({ navigation, route }) => {
             <Text
               style={{
                 color: "white",
-                marginLeft: 10,
+                marginLeft: 12,
                 fontWeight: "200",
                 fontSize: 12,
               }}
@@ -228,7 +228,6 @@ const Chats = ({ navigation, route }) => {
       </ScrollView>
       <View style={styles.footer}>
         <TextInput
-          // ref={openEmoji}
           value={input}
           onChangeText={setInput}
           placeholder="Type..."

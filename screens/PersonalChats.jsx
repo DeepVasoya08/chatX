@@ -44,8 +44,6 @@ const PersonalChats = ({
           <ActivityIndicator color="gray" size="small" />
         ) : (
           <Avatar
-            icon={{ name: "dot-single", type: "entypo" }}
-            iconStyle={{ color: "green" }}
             rounded
             source={
               !photoURL
