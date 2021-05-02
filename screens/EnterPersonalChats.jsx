@@ -15,7 +15,6 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import firebase from "firebase";
 import * as ImagePicker from "expo-image-picker";
-import * as emojis from "react-native-emoji-input";
 
 const Chats = ({ navigation, route }) => {
   const [input, setInput] = useState("");

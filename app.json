@@ -1,10 +1,12 @@
 {
   "expo": {
-    "name": "ChatHouse",
-    "slug": "ChatHouse",
+    "name": "chatX",
+    "slug": "chatX",
     "version": "1.0.0",
+    "description": "A secure and lightweight chat app",
+    "privacy": "public",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon_app.png",
     "splash": {
       "image": "./assets/logo.png",
       "resizeMode": "contain",
@@ -22,9 +24,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     }
   }
 }
